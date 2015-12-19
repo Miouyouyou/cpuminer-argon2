@@ -153,6 +153,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;SCRYPT_KECCAK512;SCRYPT_CHACHA;SCRYPT_CHOOSE_COMPILETIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.;compat;compat\curl-for-windows\curl\include;compat\jansson;compat\getopt;compat\pthreads;compat\curl-for-windows\openssl\openssl\include;compat\curl-for-windows\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -166,6 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="algo\argon2a.c" />
     <ClCompile Include="compat\getopt\getopt_long.c" />
     <ClCompile Include="compat\gettimeofday.c" />
     <ClCompile Include="compat\jansson\dump.c" />
@@ -184,6 +187,13 @@
       <Optimization Condition="'$(Configuration)'=='Release'">Full</Optimization>
     </ClCompile>
     <ClCompile Include="api.c" />
+    <ClCompile Include="sha3\ar2\src\argon2.c" />
+    <ClCompile Include="sha3\ar2\src\blake2\blake2b.c" />
+    <ClCompile Include="sha3\ar2\src\cores.c" />
+    <ClCompile Include="sha3\ar2\src\opt.c" />
+    <ClCompile Include="sha3\ar2\src\thread.c" />
+    <ClCompile Include="sha3\pomelo_x64.c" />
+    <ClCompile Include="sha3\sj\scrypt-jane.c" />
     <ClCompile Include="sysinfos.c" />
     <ClCompile Include="crypto\aesb.c" />
     <ClCompile Include="crypto\c_blake256.c" />

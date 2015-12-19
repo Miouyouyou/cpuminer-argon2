@@ -1849,6 +1849,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_CRYPTONIGHT:
 				max64 = 0x40LL;
 				break;
+			case ALGO_ARGON2:
 			case ALGO_DROP:
 			case ALGO_PLUCK:
 				max64 = 0x1ff;
@@ -1862,7 +1863,6 @@ static void *miner_thread(void *userdata)
 			case ALGO_FRESH:
 			case ALGO_GROESTL:
 			case ALGO_MYR_GR:
-			case ALGO_ARGON2:
 			case ALGO_HIVE:
 				max64 = 0x3ffff;
 				break;

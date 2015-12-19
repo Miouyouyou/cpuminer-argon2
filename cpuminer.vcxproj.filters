@@ -266,6 +266,30 @@
     <ClCompile Include="algo\axiom.c">
       <Filter>algo</Filter>
     </ClCompile>
+    <ClCompile Include="algo\argon2a.c">
+      <Filter>algo</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\ar2\src\argon2.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\ar2\src\cores.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\ar2\src\blake2\blake2b.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\ar2\src\thread.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\ar2\src\opt.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\pomelo_x64.c">
+      <Filter>crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="sha3\sj\scrypt-jane.c">
+      <Filter>argon2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sha3\sph_blake.h">
@@ -491,6 +515,9 @@
     </Filter>
     <Filter Include="res">
       <UniqueIdentifier>{5969f6d8-98c0-49c9-8e4c-51c54b5f0e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="argon2">
+      <UniqueIdentifier>{5a92d05d-5faa-4570-bf17-6e5fa90a517f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
