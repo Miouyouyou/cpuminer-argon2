@@ -48,11 +48,10 @@ cpuminer_SOURCES = \
   crypto/hash.c \
   crypto/aesb.c \
   sha3/sj/scrypt-jane.c \
-  sha3/sj/code/scrypt-jane-salsa64.h \
   sha3/ar2/src/cores.c \
   sha3/ar2/src/blake2/blake2b.c \
   sha3/ar2/src/thread.c \
-  sha3/ar2/src/ref.c \
+  sha3/ar2/src/opt.c \
   sha3/ar2/src/argon2.c \
   lyra2/Lyra2.c lyra2/Sponge.c \
   algo/axiom.c \
