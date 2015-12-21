@@ -1563,6 +1563,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		}
 
 		switch (opt_algo) {
+			case ALGO_ARGON2:
 			case ALGO_DROP:
 			case ALGO_SCRYPT:
 			case ALGO_NEOSCRYPT:
