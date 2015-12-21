@@ -242,6 +242,7 @@
     <ClCompile Include="algo\skein.c" />
     <ClCompile Include="algo\skein2.c" />
     <ClCompile Include="algo\hive.c" />
+    <ClCompile Include="algo\x11.c" />
     <ClCompile Include="algo\x13.c" />
     <ClCompile Include="algo\x14.c" />
     <ClCompile Include="algo\x15.c" />

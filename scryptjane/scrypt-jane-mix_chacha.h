@@ -10,7 +10,7 @@
 static void
 chacha_core_basic(uint32_t state[16]) {
 	size_t rounds = 8;
-	uint32_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,hive,x12,x13,x14,x15,t;
+	uint32_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,t;
 
 	x0 = state[0];
 	x1 = state[1];
@@ -23,7 +23,7 @@ chacha_core_basic(uint32_t state[16]) {
 	x8 = state[8];
 	x9 = state[9];
 	x10 = state[10];
-	hive = state[11];
+	x11 = state[11];
 	x12 = state[12];
 	x13 = state[13];
 	x14 = state[14];
@@ -39,9 +39,9 @@ chacha_core_basic(uint32_t state[16]) {
 		quarter( x0, x4, x8,x12)
 		quarter( x1, x5, x9,x13)
 		quarter( x2, x6,x10,x14)
-		quarter( x3, x7,hive,x15)
+		quarter( x3, x7,x11,x15)
 		quarter( x0, x5,x10,x15)
-		quarter( x1, x6,hive,x12)
+		quarter( x1, x6,x11,x12)
 		quarter( x2, x7, x8,x13)
 		quarter( x3, x4, x9,x14)
 	}
@@ -57,7 +57,7 @@ chacha_core_basic(uint32_t state[16]) {
 	state[8] += x8;
 	state[9] += x9;
 	state[10] += x10;
-	state[11] += hive;
+	state[11] += x11;
 	state[12] += x12;
 	state[13] += x13;
 	state[14] += x14;

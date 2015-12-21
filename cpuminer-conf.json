@@ -8,7 +8,7 @@
 	"user" : "XeVrkPrWB7pDbdFLfKhF1Z3xpqhsx6wkH3",
 	"pass" : "cpuminer",
 
-	"algo" : "hive",
+	"algo" : "x11",
 	"threads" : 0,
 	"cpu-priority" : 0,
 	"cpu-affinity" : -1,

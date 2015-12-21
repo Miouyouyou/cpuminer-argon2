@@ -83,7 +83,7 @@ enum algos {
 	ALGO_BLAKECOIN,   /* Simplified 8 rounds Blake 256 */
 	ALGO_BLAKE2S,     /* Blake2s */
 	ALGO_BMW,         /* BMW 256 */
-	ALGO_C11,         /* C11 Chaincoin/Flaxcoin HIVE variant */
+	ALGO_C11,         /* C11 Chaincoin/Flaxcoin X11 variant */
 	ALGO_CRYPTOLIGHT, /* cryptonight-light (Aeon) */
 	ALGO_CRYPTONIGHT, /* CryptoNight */
 	ALGO_DMD_GR,      /* Diamond */
@@ -102,8 +102,9 @@ enum algos {
 	ALGO_SKEIN,       /* Skein */
 	ALGO_SKEIN2,      /* Double skein (Woodcoin) */
 	ALGO_S3,          /* S3 */
-	ALGO_HIVE,         /* HIVE */
+	ALGO_HIVE,        /* HIVE */
 	ALGO_ARGON2,
+	ALGO_X11,
 	ALGO_X13,         /* X13 */
 	ALGO_X14,         /* X14 */
 	ALGO_X15,         /* X15 Whirlpool */
@@ -144,6 +145,7 @@ static const char *algo_names[] = {
 	"s3",
 	"hive",
 	"argon2",
+	"x11",
 	"x13",
 	"x14",
 	"x15",
@@ -279,8 +281,9 @@ Options:\n\
                           skein        Skein+Sha (Skeincoin)\n\
                           skein2       Double Skein (Woodcoin)\n\
                           s3           S3\n\
-                          hive          HIVE\n\
-						  argon2		argon2\n\
+                          hive         HIVE\n\
+                          argon2       argon2\n\
+                          x11          X11\n\
                           x13          X13\n\
                           x14          X14\n\
                           x15          X15\n\
@@ -1865,11 +1868,8 @@ static void *miner_thread(void *userdata)
 			case ALGO_GROESTL:
 			case ALGO_MYR_GR:
 			case ALGO_HIVE:
-				max64 = 0x3ffff;
-				break;
+			case ALGO_X11:
 			case ALGO_X13:
-				max64 = 0x3ffff;
-				break;
 			case ALGO_X14:
 				max64 = 0x3ffff;
 				break;
@@ -2018,6 +2018,10 @@ static void *miner_thread(void *userdata)
 			break;
 		case ALGO_ARGON2:
 			rc = scanhash_argon2(thr_id, work.data, work.target, max_nonce,
+					&hashes_done);
+			break;
+		case ALGO_X11:
+			rc = scanhash_x11(thr_id, work.data, work.target, max_nonce,
 					&hashes_done);
 			break;
 		case ALGO_X13:

@@ -278,7 +278,10 @@ int scanhash_s3(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 int scanhash_hive(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                             uint32_t max_nonce, uint64_t *hashes_done);
 int scanhash_argon2(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
-                            uint32_t max_nonce, uint64_t *hashes_done);						
+                            uint32_t max_nonce, uint64_t *hashes_done);
+
+int scanhash_x11(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
+                            uint32_t max_nonce, uint64_t *hashes_done);
 
 int scanhash_x13(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                             uint32_t max_nonce, uint64_t *hashes_done);
@@ -541,6 +544,7 @@ void skein2hash(void *state, const void *input);
 void s3hash(void *output, const void *input);
 void hivehash(void *output, const void *input);
 void argon2hash(void *output, const void *input);
+void x11hash(void *output, const void *input);
 void x13hash(void *output, const void *input);
 void x14hash(void *output, const void *input);
 void x15hash(void *output, const void *input);

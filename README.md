@@ -43,12 +43,12 @@ Algorithms
  * ✓ __skein__ (Skeincoin, Myriadcoin, Xedoscoin, ...)
  * ✓ __skein2__ (Woodcoin)
  * ✓ __s3__ (OneCoin)
- * ✓ __hive__ (Darkcoin [DRK], Hirocoin, Limecoin, ...)
+ * ✓ __x11__ (Darkcoin [DRK], Hirocoin, Limecoin, ...)
  * ✓ __x13__ (Sherlockcoin, [ACE], [B2B], [GRC], [XHC], ...)
  * ✓ __x14__ (X14, Webcoin [WEB])
  * ✓ __x15__ (RadianceCoin [RCE])
  * ✓ __zr5__ (Ziftrcoin [ZRC])
- * ✓ __ar2__ (Argon2Coin [AR2])
+ * ✓ __argon2__ (Argon2 [AR2])
 
 #### Implemented, but untested
  * ? blake2s

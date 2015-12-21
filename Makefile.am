@@ -84,6 +84,7 @@ cpuminer_SOURCES = \
   algo/skein2.c \
   algo/s3.c \
   algo/hive.c \
+  algo/x11.c \
   algo/x13.c \
   algo/x14.c \
   algo/x15.c \

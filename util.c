@@ -2138,7 +2138,10 @@ void print_hash_tests(void)
 
 	argon2hash(&hash[0], &buf[0]);
 	printpfx("argon2", hash);
-	
+
+	x11hash(&hash[0], &buf[0]);
+	printpfx("x11", hash);
+
 	x13hash(&hash[0], &buf[0]);
 	printpfx("x13", hash);
 

@@ -72,7 +72,7 @@ Version 1.0.4 (Tanguy Pruvot)
 Version multi 1.0.3 (Lucas Jones)
 
 - Add new algos :
-  hive (Darkcoin [DRK], Hirocoin, Limecoin)
+  x11 (Darkcoin [DRK], Hirocoin, Limecoin)
   cryptonight (Bytecoin [BCN], Monero)
   keccak (Maxcoin  HelixCoin, CryptoMeth, Galleon, 365coin, Slothcoin, BitcointalkCoin)
   hefty1 (Heavycoin)
