@@ -1,10 +1,10 @@
-CPUMiner-Multi
-==============
-
-[![Build Status](https://travis-ci.org/tpruvot/cpuminer-multi.svg)](https://travis-ci.org/tpruvot/cpuminer-multi)
+CPUMiner-Multi optimized for Argon2
+===================================
 
 This is a multi-threaded CPU miner,
-fork of [pooler](//github.com/pooler)'s cpuminer (see AUTHORS for list of contributors).
+fork of [tpruvot](//github.com/tpruvot)'s cpuminer (see AUTHORS for list of contributors), focused on Argon2.
+
+Others algorithms based on scrypt WILL fail.
 
 #### Table of contents
 
@@ -20,45 +20,7 @@ fork of [pooler](//github.com/pooler)'s cpuminer (see AUTHORS for list of contri
 Algorithms
 ==========
 #### Currently supported
- * ✓ __scrypt__ (Litecoin, Dogecoin, Feathercoin, ...)
- * ✓ __scrypt:N__
- * ✓ __sha256d__ (Bitcoin, Freicoin, Peercoin/PPCoin, Terracoin, ...)
- * ✓ __axiom__ (Axiom Shabal-256 based MemoHash)
- * ✓ __blake__ (Saffron [SFR] Blake-256)
- * ✓ __bmw__ (Midnight [MDT] BMW-256)
- * ✓ __cryptonight__ (Bytecoin [BCN], Monero)
- * ✓ __cryptonight-light__ (Aeon)
- * ✓ __dmd-gr__ (Diamond-Groestl)
- * ✓ __fresh__ (FreshCoin)
- * ✓ __groestl__ (Groestlcoin)
- * ✓ __lyra2RE__ (Lyrabar, Cryptocoin)
- * ✓ __lyra2REv2__ (VertCoin [VTC])
- * ✓ __myr-gr__ (Myriad-Groestl)
- * ✓ __neoscrypt__ (Feathercoin)
- * ✓ __nist5__ (MistCoin [MIC], TalkCoin [TAC], ...)
- * ✓ __pentablake__ (Joincoin)
- * ✓ __pluck__ (Supcoin [SUP])
- * ✓ __quark__ (Quarkcoin)
- * ✓ __qubit__ (MyriadCoin [MYR])
- * ✓ __skein__ (Skeincoin, Myriadcoin, Xedoscoin, ...)
- * ✓ __skein2__ (Woodcoin)
- * ✓ __s3__ (OneCoin)
- * ✓ __x11__ (Darkcoin [DRK], Hirocoin, Limecoin, ...)
- * ✓ __x13__ (Sherlockcoin, [ACE], [B2B], [GRC], [XHC], ...)
- * ✓ __x14__ (X14, Webcoin [WEB])
- * ✓ __x15__ (RadianceCoin [RCE])
- * ✓ __zr5__ (Ziftrcoin [ZRC])
  * ✓ __argon2__ (Argon2 [AR2])
-
-#### Implemented, but untested
- * ? blake2s
- * ? hefty1 (Heavycoin)
- * ? keccak (Maxcoin  HelixCoin, CryptoMeth, Galleon, 365coin, Slothcoin, BitcointalkCoin)
- * ? luffa (Joincoin, Doomcoin)
- * ? shavite3 (INKcoin)
-
-#### Planned support for
- * *scrypt-jane* (YaCoin, CopperBars, Pennies, Tickets, etc..)
  
 Dependencies
 ============
@@ -71,8 +33,8 @@ Dependencies
 Download
 ========
  * Windows releases: https://github.com/tpruvot/cpuminer-multi/releases
- * Git tree:   https://github.com/tpruvot/cpuminer-multi
-   * Clone with `git clone https://github.com/tpruvot/cpuminer-multi`
+ * Git tree:   https://github.com/Miouyouyou/cpuminer-argon2
+   * Clone with `git clone https://github.com/Miouyouyou/cpuminer-argon2`
 
 Build
 =====
@@ -140,6 +102,10 @@ When the --proxy option is not used, the program honors the http_proxy and all_p
 Donations
 =========
 Donations for the work done in this fork are accepted :
+
+Miouyouyou :
+* BTC: `1LhaUEtzhNexchon1iY2oGQxJMajFLX2iQ`
+* OPES: `oYhXjGUiKBVQ3Wqp6mhhPn9kHNEWszGF5v`
 
 Tanguy Pruvot :
 * BTC: `1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd`
