@@ -114,70 +114,82 @@ BLAKE2_ROUND(state[7], state[15], state[23], state[31], state[39], state[47], st
 }
 
 
+/*void print64(const char *name, const uint64_t *array, uint16_t size) {
+  printf("%s = {", name);
+  for (uint8_t i = 0; i < size; i++) printf("UINT64_C(%" PRIu64 "), ", array[i]);
+  printf("};\n");
+}*/
 
+static const uint64_t bad_rands[32] = {
+  UINT64_C(17023632018251376180), UINT64_C(4911461131397773491), 
+  UINT64_C(15927076453364631751), UINT64_C(7860239898779391109),
+
+  UINT64_C(11820267568857244377), UINT64_C(12188179869468676617), 
+  UINT64_C(3732913385414474778),  UINT64_C(7651458777762572084),
+
+  UINT64_C(3062274162574341415),  UINT64_C(17922653540258786897), 
+  UINT64_C(17393848266100524980), UINT64_C(8539695715554563839),
+
+  UINT64_C(13824538050656654359), UINT64_C(12078939433126460936), 
+  UINT64_C(15331979418564540430), UINT64_C(12058346794217174273),
+
+  UINT64_C(13593922096015221049), UINT64_C(18356682276374416500), 
+  UINT64_C(4968040514092703824),  UINT64_C(11202790346130235567),
+
+  UINT64_C(2276229735041314644), UINT64_C(220837743321691382), 
+  UINT64_C(4861211596230784273), UINT64_C(6330592584132590331),
+
+  UINT64_C(3515580430960296763), UINT64_C(9869356316971855173), 
+  UINT64_C(485533243489193056),  UINT64_C(14596447761048148032),
+
+  UINT64_C(16531790085730132900), UINT64_C(17328824500878824371), 
+  UINT64_C(8548260058287621283),  UINT64_C(8641748798041936364)
+};
 
 void generate_addresses(const argon2_instance_t *instance,
                         const argon2_position_t *position,
                         uint64_t *pseudo_rands) {
-    block address_block, input_block;
-    uint32_t i;
+    uint8_t offset = position->pass * 16 + position->slice * 4;
+    pseudo_rands[0] = bad_rands[offset++];
+    pseudo_rands[1] = bad_rands[offset++];
+    pseudo_rands[2] = bad_rands[offset++];
+    pseudo_rands[3] = bad_rands[offset++];
 
-    init_block_value(&address_block, 0);
-    init_block_value(&input_block, 0);
-
-    input_block.v[0] = position->pass;
-    input_block.v[1] = position->lane;
-    input_block.v[2] = position->slice;
-    input_block.v[3] = 16;
-    input_block.v[4] = 2;
-    input_block.v[5] = instance->type;
-    input_block.v[6]++;
-    fill_block_from_zero((__m128i const *)&input_block.v, 
-                         (__m128i const *)&address_block.v);
-    fill_block_from_zero((__m128i const *)&address_block.v, 
-                         (__m128i const *)&address_block.v);
-
-    pseudo_rands[0] = address_block.v[0];
-    pseudo_rands[1] = address_block.v[1];
-    pseudo_rands[2] = address_block.v[2];
-    pseudo_rands[3] = address_block.v[3];
+    /*if ((position->pass == 1 && position->slice == 3))
+      print64("pseudo_rands", pseudo_rands, 4);*/
 }
+
+#define SEGMENT_LENGTH 4
+#define LANE_LENGTH 16
+#define POS_LANE 0
 
 void fill_segment(const argon2_instance_t *instance,
                   argon2_position_t position) {
     block *ref_block = NULL, *curr_block = NULL;
-    uint64_t pseudo_rand, ref_index, ref_lane;
+    uint64_t pseudo_rand, ref_index;
     uint32_t prev_offset, curr_offset;
-    uint32_t starting_index, i;
+    uint8_t i;
     __m128i state[64];
     int data_independent_addressing = (instance->type == Argon2_i);
 
     /* Pseudo-random values that determine the reference block position */
     uint64_t *pseudo_rands = NULL;
 
-    /*if (instance == NULL) {
-        return;
-    }*/
-
     pseudo_rands = (uint64_t *)malloc(/*sizeof(uint64_t) * 4*/32);
-
-    /*if (pseudo_rands == NULL) {
-        return;
-    }*/
 
     if (data_independent_addressing) {
         generate_addresses(instance, &position, pseudo_rands);
     }
 
-    starting_index = 0;
+    i = 0;
 
     if ((0 == position.pass) && (0 == position.slice)) {
-        starting_index = 2; /* we have already generated the first two blocks */
+        i = 2; /* we have already generated the first two blocks */
     }
 
+    /*printf("Position.lane = %d\nPosition.slice = %d\nStarting index : %d\n", position.lane, position.slice, starting_index);*/
     /* Offset of the current block */
-    curr_offset = position.lane * 16 +
-                  position.slice * 4 + starting_index;
+    curr_offset = position.slice * 4 + i;
 
     if (0 == curr_offset % 16) {
         /* Last block in this lane */
@@ -189,10 +201,10 @@ void fill_segment(const argon2_instance_t *instance,
 
     memcpy(state, ((instance->memory + prev_offset)->v), ARGON2_BLOCK_SIZE);
 
-    for (i = starting_index; i < /*instance->segment_length*/4;
+    for (; i < SEGMENT_LENGTH;
          ++i, ++curr_offset, ++prev_offset) {
         /*1.1 Rotating prev_offset if needed */
-        if (curr_offset % /*instance->lane_length*/16 == 1) {
+        if (curr_offset % LANE_LENGTH == 1) {
             prev_offset = curr_offset - 1;
         }
 
