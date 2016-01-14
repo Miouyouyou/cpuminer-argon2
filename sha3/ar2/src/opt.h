@@ -21,7 +21,8 @@
  * @param next_block Pointer to the block to be constructed
  * @pre all block pointers must be valid
  */
-void fill_block(__m128i *state, const uint8_t *ref_block, uint8_t *next_block);
+void fill_block(__m128i *state, __m128i const *ref_block, __m128i const *next_block);
+void fill_block_from_zero(__m128i const *ref_block, __m128i const *next_block);
 
 /*
  * Generate pseudo-random values to reference blocks in the segment and puts
