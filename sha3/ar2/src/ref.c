@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <inttypes.h>
 
 #include "argon2.h"
 #include "cores.h"
@@ -89,7 +88,6 @@ void generate_addresses(const argon2_instance_t *instance,
             pseudo_rands[i] = address_block.v[i % ARGON2_ADDRESSES_IN_BLOCK];
         }
     }
-    printf("pseudo_rands = {" PRIu64 ", " PRIu64 ", " PRIu64 ", " PRIu64 "}", pseudo_rands[0], pseudo_rands[1], pseudo_rands[2], pseudo_rands[3]);
 }
 
 void fill_segment(const argon2_instance_t *instance,
