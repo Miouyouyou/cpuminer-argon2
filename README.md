@@ -106,6 +106,7 @@ Donations for the work done in this fork are accepted :
 Miouyouyou :
 * BTC: `1LhaUEtzhNexchon1iY2oGQxJMajFLX2iQ`
 * OPES: `oYhXjGUiKBVQ3Wqp6mhhPn9kHNEWszGF5v`
+* AR2: `4hZJtUcZFofb9ipyafAqFNxvotFE2dns8e`
 
 Tanguy Pruvot :
 * BTC: `1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd`
