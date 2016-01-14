@@ -2938,6 +2938,7 @@ static void show_credits()
 	printf("** " PACKAGE_NAME_ARGON2 " " PACKAGE_VERSION_ARGON2_1 " by testz (testzcrypto@github) **\n");
 	printf("BTC donation address: 169iMuiJxoEjJmFpPhnWtNCPkV2epYK7Wc\n\n");
 	printf("** " PACKAGE_NAME_ARGON2 " " PACKAGE_VERSION_ARGON2_2 " by Miouyouyou (Miouyouyou@github) **\n");
+        printf("BTC donation address: 1LhaUEtzhNexchon1iY2oGQxJMajFLX2iQ\n\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
