@@ -48,6 +48,16 @@ _OR_
    * # Use -march=native if building for a single machine
  * make
 
+#### Profile guided optimized version with GCC
+ * ./autogen.sh
+ * ./configure CFLAGS="-O3 -march=native -Wall -D_REENTRANT -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16 -fprofile-generate" LDFLAGS="-fprofile-generate"
+ * make
+ * ./cpuminer (With your usual arguments)
+ * Let it run for a few minutes, then stop it
+ * make distclean
+ * ./configure CFLAGS="-O3 -march=native -Wall -D_REENTRANT -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16 -fprofile-correction -fprofile-use" LDFLAGS="-fprofile-correction -fprofile-use"
+ * make
+
 #### Notes for AIX users:
  * To build a 64-bit binary, export OBJECT_MODE=64
  * GNU-style long options are not supported, but are accessible via configuration file

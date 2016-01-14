@@ -14,24 +14,6 @@
 #define MASK 8
 #define ZERO 0
 
-void argon2hash(void *output, const void *input)
-{
-	// these uint512 in the c++ source of the client are backed by an array of uint32
-	uint32_t _ALIGN(32) hashA[8], hashB[8], hashC[8];
-
-	my_scrypt((const unsigned char *)input, 80,
-		(const unsigned char *)input, 80,
-		(unsigned char *)hashA);
-
-       argon_call(hashB, hashA, hashA, (hashA[0] & MASK) == ZERO);
-
-	my_scrypt((const unsigned char *)hashB, 32,
-		(const unsigned char *)hashB, 32,
-		(unsigned char *)hashC);
-
-	memcpy(output, hashC, 32);
-}
-
 void argon_call(void *out, void *in, void *salt, int type) {
   argon2_context context;
 
@@ -53,6 +35,24 @@ void argon_call(void *out, void *in, void *salt, int type) {
   context.flags = ARGON2_DEFAULT_FLAGS;*/
 
   argon2_core(&context, type);
+}
+
+void argon2hash(void *output, const void *input)
+{
+	// these uint512 in the c++ source of the client are backed by an array of uint32
+	uint32_t _ALIGN(32) hashA[8], hashB[8], hashC[8];
+
+	my_scrypt((const unsigned char *)input, 80,
+		(const unsigned char *)input, 80,
+		(unsigned char *)hashA);
+
+       argon_call(hashB, hashA, hashA, (hashA[0] & MASK) == ZERO);
+
+	my_scrypt((const unsigned char *)hashB, 32,
+		(const unsigned char *)hashB, 32,
+		(unsigned char *)hashC);
+
+	memcpy(output, hashC, 32);
 }
 
 int scanhash_argon2(int thr_id, uint32_t *pdata, const uint32_t *ptarget,

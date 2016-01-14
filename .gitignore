@@ -3,6 +3,7 @@ cpuminer
 *.exe
 *.o
 *.d
+*.gcda
 gmon.out
 
 autom4te.cache
