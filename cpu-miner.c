@@ -83,7 +83,7 @@ enum algos {
 	ALGO_BLAKECOIN,   /* Simplified 8 rounds Blake 256 */
 	ALGO_BLAKE2S,     /* Blake2s */
 	ALGO_BMW,         /* BMW 256 */
-	ALGO_C11,         /* C11 Chaincoin/Flaxcoin X11 variant */
+	ALGO_C11,         /* C11 Chaincoin/Flaxcoin HIVE variant */
 	ALGO_CRYPTOLIGHT, /* cryptonight-light (Aeon) */
 	ALGO_CRYPTONIGHT, /* CryptoNight */
 	ALGO_DMD_GR,      /* Diamond */
@@ -102,9 +102,8 @@ enum algos {
 	ALGO_SKEIN,       /* Skein */
 	ALGO_SKEIN2,      /* Double skein (Woodcoin) */
 	ALGO_S3,          /* S3 */
-	ALGO_HIVE,        /* HIVE */
+	ALGO_HIVE,         /* HIVE */
 	ALGO_ARGON2,
-	ALGO_X11,
 	ALGO_X13,         /* X13 */
 	ALGO_X14,         /* X14 */
 	ALGO_X15,         /* X15 Whirlpool */
@@ -145,7 +144,6 @@ static const char *algo_names[] = {
 	"s3",
 	"hive",
 	"argon2",
-	"x11",
 	"x13",
 	"x14",
 	"x15",
@@ -181,7 +179,7 @@ static int opt_scrypt_n = 1024;
 static int opt_pluck_n = 128;
 static unsigned int opt_nfactor = 6;
 int opt_n_threads = 0;
-int64_t opt_affinity = -1L;
+int opt_affinity = -1;
 int opt_priority = 0;
 int num_cpus;
 char *rpc_url;
@@ -281,9 +279,8 @@ Options:\n\
                           skein        Skein+Sha (Skeincoin)\n\
                           skein2       Double Skein (Woodcoin)\n\
                           s3           S3\n\
-                          hive         HIVE\n\
-                          argon2       argon2\n\
-                          x11          X11\n\
+                          hive          HIVE\n\
+			  argon2		argon2\n\
                           x13          X13\n\
                           x14          X14\n\
                           x15          X15\n\
@@ -429,7 +426,7 @@ static void affine_to_cpu_mask(int id, unsigned long mask) {
 	CPU_ZERO(&set);
 	for (uint8_t i = 0; i < num_cpus; i++) {
 		// cpu mask
-		if (mask & (1UL<<i)) { CPU_SET(i, &set); }
+		if (mask & (1<<i)) { CPU_SET(i, &set); }
 	}
 	if (id == -1) {
 		// process affinity
@@ -442,7 +439,7 @@ static void affine_to_cpu_mask(int id, unsigned long mask) {
 
 #elif defined(WIN32) /* Windows */
 static inline void drop_policy(void) { }
-static void affine_to_cpu_mask(int id, unsigned long mask) {
+static void affine_to_cpu_mask(int id, uint8_t mask) {
 	if (id == -1)
 		SetProcessAffinityMask(GetCurrentProcess(), mask);
 	else
@@ -450,7 +447,7 @@ static void affine_to_cpu_mask(int id, unsigned long mask) {
 }
 #else
 static inline void drop_policy(void) { }
-static void affine_to_cpu_mask(int id, unsigned long mask) { }
+static void affine_to_cpu_mask(int id, uint8_t mask) { }
 #endif
 
 void get_currentalgo(char* buf, int sz)
@@ -1566,11 +1563,11 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		}
 
 		switch (opt_algo) {
-			case ALGO_ARGON2:
 			case ALGO_DROP:
 			case ALGO_SCRYPT:
 			case ALGO_NEOSCRYPT:
 			case ALGO_PLUCK:
+			case ALGO_ARGON2:
 				diff_to_target(work->target, sctx->job.diff / (65536.0 * opt_diff_factor));
 				break;
 			case ALGO_FRESH:
@@ -1693,12 +1690,12 @@ static void *miner_thread(void *userdata)
 			if (opt_debug)
 				applog(LOG_DEBUG, "Binding thread %d to cpu %d (mask %x)", thr_id,
 						thr_id % num_cpus, (1 << (thr_id % num_cpus)));
-			affine_to_cpu_mask(thr_id, 1UL << (thr_id % num_cpus));
-		} else if (opt_affinity != -1L) {
+			affine_to_cpu_mask(thr_id, 1 << (thr_id % num_cpus));
+		} else if (opt_affinity != -1) {
 			if (opt_debug)
 				applog(LOG_DEBUG, "Binding thread %d to cpu mask %x", thr_id,
 						opt_affinity);
-			affine_to_cpu_mask(thr_id, (unsigned long)opt_affinity);
+			affine_to_cpu_mask(thr_id, opt_affinity);
 		}
 	}
 
@@ -1853,7 +1850,6 @@ static void *miner_thread(void *userdata)
 			case ALGO_CRYPTONIGHT:
 				max64 = 0x40LL;
 				break;
-			case ALGO_ARGON2:
 			case ALGO_DROP:
 			case ALGO_PLUCK:
 				max64 = 0x1ff;
@@ -1866,10 +1862,16 @@ static void *miner_thread(void *userdata)
 			case ALGO_DMD_GR:
 			case ALGO_FRESH:
 			case ALGO_GROESTL:
-			case ALGO_MYR_GR:
+			case ALGO_MYR_GR:			
 			case ALGO_HIVE:
-			case ALGO_X11:
+				max64 = 0x3ffff;
+				break;
+			case ALGO_ARGON2:
+				max64 = 0xf;
+				break;
 			case ALGO_X13:
+				max64 = 0x3ffff;
+				break;
 			case ALGO_X14:
 				max64 = 0x3ffff;
 				break;
@@ -2018,10 +2020,6 @@ static void *miner_thread(void *userdata)
 			break;
 		case ALGO_ARGON2:
 			rc = scanhash_argon2(thr_id, work.data, work.target, max_nonce,
-					&hashes_done);
-			break;
-		case ALGO_X11:
-			rc = scanhash_x11(thr_id, work.data, work.target, max_nonce,
 					&hashes_done);
 			break;
 		case ALGO_X13:
@@ -2784,7 +2782,7 @@ void parse_arg(int key, char *arg)
 			ul = strtoul(p, NULL, 16);
 		else
 			ul = atol(arg);
-		if (ul > (1UL<<num_cpus)-1)
+		if (ul > (1<<num_cpus)-1)
 			ul = -1;
 		opt_affinity = ul;
 		break;
@@ -2930,10 +2928,16 @@ static int thread_create(struct thr_info *thr, void* func)
 	return err;
 }
 
+#define PACKAGE_NAME_ARGON2 "cpuminer-multi-argon2"
+#define PACKAGE_VERSION_ARGON2_1 "1.0.1-dev"
+#define PACKAGE_VERSION_ARGON2_2 "1.0.2-dev"
 static void show_credits()
 {
 	printf("** " PACKAGE_NAME " " PACKAGE_VERSION " by Tanguy Pruvot (tpruvot@github) **\n");
 	printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd\n\n");
+	printf("** " PACKAGE_NAME_ARGON2 " " PACKAGE_VERSION_ARGON2_1 " by testz (testzcrypto@github) **\n");
+	printf("BTC donation address: 169iMuiJxoEjJmFpPhnWtNCPkV2epYK7Wc\n\n");
+	printf("** " PACKAGE_NAME_ARGON2 " " PACKAGE_VERSION_ARGON2_2 " by Miouyouyou (Miouyouyou@github) **\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
@@ -3076,7 +3080,7 @@ int main(int argc, char *argv[]) {
 	if (opt_affinity != -1) {
 		if (!opt_quiet)
 			applog(LOG_DEBUG, "Binding process to cpu mask %x", opt_affinity);
-		affine_to_cpu_mask(-1, (unsigned long)opt_affinity);
+		affine_to_cpu_mask(-1, opt_affinity);
 	}
 
 #ifdef HAVE_SYSLOG_H
