@@ -288,40 +288,96 @@ void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance) {
     secure_wipe_memory(blockhash_bytes, ARGON2_BLOCK_SIZE);
 }
 
+
+static blake2b_state base_hash = {
+ .h = {
+  UINT64_C(7640891576939301192), UINT64_C(13503953896175478587), 
+  UINT64_C(4354685564936845355), UINT64_C(11912009170470909681), 
+  UINT64_C(5840696475078001361), UINT64_C(11170449401992604703), 
+  UINT64_C(2270897969802886507), UINT64_C(6620516959819538809)
+ },
+ .t = {UINT64_C(0),UINT64_C(0)},
+ .f = {UINT64_C(0),UINT64_C(0)},
+ .buf = {
+  UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(32), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(16), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(2), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(16), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(32), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), 
+  UINT8_C(0), UINT8_C(0)
+ },
+ .buflen = 28,
+ .outlen = 64,
+ .last_node = UINT8_C(0)
+};
 void initial_hash(uint8_t *blockhash, argon2_context *context,
                   argon2_type type) {
-    blake2b_state BlakeHash;
-    uint8_t value[sizeof(uint32_t)];
+
+    /*uint8_t i;*/
 
     /*if (NULL == context || NULL == blockhash) {
         return;
     }*/
 
-    blake2b_init(&BlakeHash, ARGON2_PREHASH_DIGEST_LENGTH);
+    /*blake2b_init(&BlakeHash, ARGON2_PREHASH_DIGEST_LENGTH);*/
 
-    store32(&value, /*context->lanes*/1);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*store32(&value, *//*context->lanes*//*1);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
 
-    store32(&value, /*context->outlen*/32);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*store32(&value, *//*context->outlen*//*32);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
 
-    store32(&value, /*context->m_cost*/16);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*store32(&value, *//*context->m_cost*//*16);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
 
-    store32(&value, /*context->t_cost*/2);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*store32(&value, /*context->t_cost*//*2);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
 
-    store32(&value, ARGON2_VERSION_NUMBER);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*store32(&value, ARGON2_VERSION_NUMBER);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
 
-    store32(&value, (uint32_t)type);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /*uint64_t h[8];
+    uint64_t t[2];
+    uint64_t f[2];
+    uint8_t buf[BLAKE2B_BLOCKBYTES];
+    unsigned buflen;
+    unsigned outlen;
+    uint8_t last_node;*/
 
-    store32(&value, /*context->pwdlen*/32);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    /**/
 
- 
-    blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
+
+    
+    /*store32(&value, (uint32_t)type);
+    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));*/
+
+    /*store32(&value, *//*context->pwdlen*//*32);*/
+    /*blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+
+    if (!type) state_printer(BlakeHash);*/
+
+    uint8_t value[sizeof(uint32_t)];
+
+    /* Is it generating cache invalidation between cores ? */
+    blake2b_state BlakeHash = base_hash; 
+    BlakeHash.buf[20] = (uint8_t) type;
+    my_blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
                    /*context->pwdlen*/32);
 
 
@@ -329,14 +385,14 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     context->pwdlen = 0;
 
     store32(&value, /*context->saltlen*/32);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    my_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
  
-    blake2b_update(&BlakeHash, (const uint8_t *)context->salt,
+    my_blake2b_update(&BlakeHash, (const uint8_t *)context->salt,
                    /*context->saltlen*/32);
  
     store32(&value, /*context->secretlen*/0);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    my_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     /*if (context->secret != NULL) {
         blake2b_update(&BlakeHash, (const uint8_t *)context->secret,
@@ -349,13 +405,14 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     }*/
 
     store32(&value, /*context->adlen*/0);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    my_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     /*if (context->ad != NULL) {
         blake2b_update(&BlakeHash, (const uint8_t *)context->ad,
                        context->adlen);
     }*/
 
+    /*state_printer(BlakeHash);*/
     blake2b_final(&BlakeHash, blockhash, ARGON2_PREHASH_DIGEST_LENGTH);
 }
 

@@ -16,7 +16,7 @@
 	SCRYPT_SHA512
 	SCRYPT_SKEIN512
 */
-//#define SCRYPT_SHA256
+/*#define SCRYPT_SKEIN512*/
 
 
 /*

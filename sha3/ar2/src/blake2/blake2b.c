@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "blake2.h"
 #include "blake2-impl.h"
@@ -243,24 +244,81 @@ int blake2b_update(blake2b_state *S, const void *in, size_t inlen) {
     return 0;
 }
 
+void my_blake2b_update(blake2b_state *S, const void *in, size_t inlen) {
+    const uint8_t *pin = (const uint8_t *)in;
+
+    /*if (inlen == 0) {
+        return 0;
+    }*/
+
+    /* Sanity check */
+    /*if (S == NULL || in == NULL) {
+        return -1;
+    }*/
+
+    /* Is this a reused state? */
+    /*if (S->f[0] != 0) {
+        return -1;
+    }*/
+
+    if (S->buflen + inlen > BLAKE2B_BLOCKBYTES) {
+        /* Complete current block */
+        size_t left = S->buflen;
+        size_t fill = BLAKE2B_BLOCKBYTES - left;
+        memcpy(&S->buf[left], pin, fill);
+        /*blake2b_increment_counter(S, BLAKE2B_BLOCKBYTES);
+          blake2b_compress(S, S->buf);*/
+        S->buflen = 0;
+        inlen -= fill;
+        pin += fill;
+        /* Avoid buffer copies when possible */
+        while (inlen > BLAKE2B_BLOCKBYTES) {
+            /*blake2b_increment_counter(S, BLAKE2B_BLOCKBYTES);
+              blake2b_compress(S, pin);*/
+            inlen -= BLAKE2B_BLOCKBYTES;
+            pin += BLAKE2B_BLOCKBYTES;
+        }
+    }
+    memcpy(&S->buf[S->buflen], pin, inlen);
+    S->buflen += (unsigned int)inlen;
+}
+
+
+/*void state_printer(blake2b_state BlakeHash) {
+  printf("h = {%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ","
+              "%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "}\n"
+         "t = {%" PRIu64 ",%" PRIu64 "}\nf{%" PRIu64 ",%" PRIu64 "}\n",
+         BlakeHash.h[0], BlakeHash.h[1], BlakeHash.h[2], BlakeHash.h[3], 
+         BlakeHash.h[4], BlakeHash.h[5], BlakeHash.h[6], BlakeHash.h[7],
+         BlakeHash.t[0], BlakeHash.t[1], BlakeHash.f[0], BlakeHash.f[1]);
+  printf("buf = {");
+  for (register uint8_t i = 0; i < BLAKE2B_BLOCKBYTES; i++) 
+    printf("%" PRIu8 ", ", BlakeHash.buf[i]);
+  printf("}\nbuflen = %d\noutlen = %d\n", 
+          BlakeHash.buflen, BlakeHash.outlen);
+  printf("last_node = %" PRIu8 "\n", BlakeHash.last_node);
+}*/
+
 int blake2b_final(blake2b_state *S, void *out, size_t outlen) {
     uint8_t buffer[BLAKE2B_OUTBYTES] = {0};
     unsigned int i;
 
     /* Sanity checks */
-    if (S == NULL || out == NULL || outlen < S->outlen) {
+    /*if (S == NULL || out == NULL || outlen < S->outlen) {
         return -1;
-    }
+    }*/
 
     /* Is this a reused state? */
-    if (S->f[0] != 0) {
+    /*if (S->f[0] != 0) {
         return -1;
-    }
+    }*/
 
     blake2b_increment_counter(S, S->buflen);
     blake2b_set_lastblock(S);
     memset(&S->buf[S->buflen], 0, BLAKE2B_BLOCKBYTES - S->buflen); /* Padding */
     blake2b_compress(S, S->buf);
+
+    /*state_printer(*S);*/
 
     for (i = 0; i < 8; ++i) { /* Output full hash to temp buffer */
         store64(buffer + sizeof(S->h[i]) * i, S->h[i]);
