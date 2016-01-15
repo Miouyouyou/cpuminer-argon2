@@ -114,12 +114,6 @@ BLAKE2_ROUND(state[7], state[15], state[23], state[31], state[39], state[47], st
 }
 
 
-/*void print64(const char *name, const uint64_t *array, uint16_t size) {
-  printf("%s = {", name);
-  for (uint8_t i = 0; i < size; i++) printf("UINT64_C(%" PRIu64 "), ", array[i]);
-  printf("};\n");
-}*/
-
 static const uint64_t bad_rands[32] = {
   UINT64_C(17023632018251376180), UINT64_C(4911461131397773491), 
   UINT64_C(15927076453364631751), UINT64_C(7860239898779391109),
