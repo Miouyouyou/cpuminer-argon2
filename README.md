@@ -2,7 +2,7 @@ CPUMiner-Multi optimized for Argon2
 ===================================
 
 This is a multi-threaded CPU miner,
-fork of [tpruvot](//github.com/tpruvot)'s cpuminer (see AUTHORS for list of contributors), focused on Argon2.
+based on [Encel-US](//github.com/Encel-US/cpuminer-multi) fork of cpuminer, with [tpruvot](//github.com/tpruvot)'s enhancements (see AUTHORS for list of contributors), focused on Argon2.
 
 Others algorithms based on scrypt WILL fail.
 
@@ -48,15 +48,17 @@ _OR_
    * # Use -march=native if building for a single machine
  * make
 
-#### Profile guided optimized version with GCC
+#### PGO build with GCC
  * ./autogen.sh
- * ./configure CFLAGS="-O3 -march=native -Wall -D_REENTRANT -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16 -fprofile-generate" LDFLAGS="-fprofile-generate"
+ * ./configure CFLAGS="-O3 -march=native -fprofile-generate" LDFLAGS="-fprofile-generate"
  * make
  * ./cpuminer (With your usual arguments)
  * Let it run for a few minutes, then stop it
  * make distclean
- * ./configure CFLAGS="-O3 -march=native -Wall -D_REENTRANT -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16 -fprofile-correction -fprofile-use" LDFLAGS="-fprofile-correction -fprofile-use"
+ * ./configure CFLAGS="-O3 -march=native -fprofile-correction -fprofile-use" LDFLAGS="-fprofile-correction -fprofile-use"
  * make
+
+This should generate a profiled version of cpuminer. You might squeeze 10% more performance with that kind of build.
 
 #### Notes for AIX users:
  * To build a 64-bit binary, export OBJECT_MODE=64
@@ -129,6 +131,7 @@ Lucas Jones :
 Credits
 =======
 CPUMiner-multi was forked from pooler's CPUMiner, and has been started by Lucas Jones.
+* [Encel-US](https://github.com/Encel-US) added the Argon2 algorithm
 * [tpruvot](https://github.com/tpruvot) added all the recent features and newer algorythmns
 * [Wolf9466](https://github.com/wolf9466) helped with Intel AES-NI support for CryptoNight
 
