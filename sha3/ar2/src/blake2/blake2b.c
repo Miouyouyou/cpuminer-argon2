@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
-
+#include <immintrin.h>
 #include "blake2.h"
 #include "blake2-impl.h"
 
@@ -76,7 +76,7 @@ static BLAKE2_INLINE void blake2b_init0(blake2b_state *S) {
   fflush(stdout);
 }*/
 
-static const blake2b_state miou = {
+static const blake2b_state default_state = {
  .h = {
   UINT64_C(7640891576939301128), UINT64_C(13503953896175478587),
   UINT64_C(4354685564936845355), UINT64_C(11912009170470909681),
@@ -117,13 +117,52 @@ int blake2b_init_param(blake2b_state *S, const blake2b_param *P) {
 
 void compare_buffs(uint64_t *h, size_t outlen) {
   /*printf("CMP : %d", memcmp(h, miou.h, 8*(sizeof(uint64_t))));*/
-  printf("miou : %" PRIu64 " - h : %" PRIu64 " - outlen : %ld\n", miou.h[0], h[0], outlen);
+  printf("default_state : %" PRIu64 " - h : %" PRIu64 " - outlen : %ld\n", default_state.h[0], h[0], outlen);
+  fflush(stdout);
+}
+
+void print8_hexa(uint8_t *ptr, size_t len) {
+  uint64_t loops = len >> 4;
+    printf("--------------------------------------------------\n");
+  while(loops--) {
+    printf("%x %x %x %x  %x %x %x %x  %x %x %x %x  %x %x %x %x\n",
+            ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7], 
+            ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+    ptr += 16;
+  }
+            
+    printf("--------------------------------------------------\n");
   fflush(stdout);
 }
 
 /* Sequential blake2b initialization */
 int blake2b_init(blake2b_state *S, size_t outlen) {
-    memcpy(S, &miou, sizeof(*S));
+    //memcpy(S, &default_state, sizeof(*S));
+    {
+      uint8_t *ugly = (uint8_t *)S;
+      uint8_t *src = (uint8_t *)(&default_state);
+      /*printf("Size of S : %lu\n", sizeof(*S));
+      print8_hexa(src, 256);*/
+	    __m256i ymm = _mm256_load_si256((const __m256i *)src);
+	    _mm256_store_si256((__m256i *)(ugly), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+32));
+	    _mm256_store_si256((__m256i *)(ugly+32), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+64));
+	    _mm256_store_si256((__m256i *)(ugly+64), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+96));
+	    _mm256_store_si256((__m256i *)(ugly+96), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+128));
+	    _mm256_store_si256((__m256i *)(ugly+128), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+160));
+	    _mm256_store_si256((__m256i *)(ugly+160), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+192));
+	    _mm256_store_si256((__m256i *)(ugly+192), ymm);
+	    ymm = _mm256_load_si256((const __m256i *)(src+224));
+	    _mm256_store_si256((__m256i *)(ugly+224), ymm);
+	    /*print8_hexa(ugly, 256);*/
+  	}
+    
+    
     S->h[0] += outlen;
     return 0;
 }
@@ -203,7 +242,6 @@ int blake2b_update(blake2b_state *S, const void *in, size_t inlen) {
     pin += 124;
     
     register int8_t i = 7;
-    /* Avoid buffer copies when possible */
     while (i--) {
       blake2b_increment_counter(S, BLAKE2B_BLOCKBYTES);
       blake2b_compress(S, pin);
@@ -221,7 +259,7 @@ void my_blake2b_update(blake2b_state *S, const void *in, size_t inlen) {
 }
 
 int blake2b_final(blake2b_state *S, void *out, size_t outlen) {
-    uint8_t buffer[BLAKE2B_OUTBYTES] = {0};
+    /*uint8_t buffer[BLAKE2B_OUTBYTES] ALIGN(32) = {0};*/
     unsigned int i;
 
     blake2b_increment_counter(S, S->buflen);
@@ -229,20 +267,30 @@ int blake2b_final(blake2b_state *S, void *out, size_t outlen) {
     memset(&S->buf[S->buflen], 0, BLAKE2B_BLOCKBYTES - S->buflen); /* Padding */
     blake2b_compress(S, S->buf);
 
-    for (i = 0; i < 8; ++i) { /* Output full hash to temp buffer */
-        store64(buffer + sizeof(S->h[i]) * i, S->h[i]);
-    }
+    /*for (i = 0; i < 8; ++i) {*/ /* Output full hash to temp buffer */
+      /*store64(buffer + sizeof(S->h[i]) * i, S->h[i]);*/
+	    {
+	      uint8_t const *src = (const uint8_t *)(S->h);
+	      /*print8_hexa(src, 64);*/
+     	  __m256i ymm = _mm256_load_si256((__m256i*)src);
+    	  _mm256_store_si256((__m256i*)out, ymm);
+    	  ymm = _mm256_load_si256((__m256i*)(src+32));
+    	  _mm256_store_si256((__m256i*)(out+32), ymm);
+    	  /*print8_hexa(out, 64);*/
+     	}        
+    /*}*/
 
-    memcpy(out, buffer, S->outlen);
+    /*printf("S->outlen : %d\n", S->outlen);*/
+    /*memcpy(out, buffer, S->outlen);*/
 
-    burn(buffer, sizeof(buffer));
+    /*burn(buffer, sizeof(buffer));*/
     burn(S->buf, sizeof(S->buf));
     burn(S->h, sizeof(S->h));
     return 0;
 }
 
 int blake2b(void *out, const void *in, const void *key, size_t keylen) {
-    blake2b_state S;
+    blake2b_state S ALIGN(32);
 
     blake2b_init(&S, 64);
     my_blake2b_update(&S, in, 64);
@@ -251,30 +299,56 @@ int blake2b(void *out, const void *in, const void *key, size_t keylen) {
     return 0;
 }
 
-void blake2b_too(void *pout, const void *in) {
+void blake2b_too(uint8_t *pout, const uint8_t *in) {
 	uint8_t *out = (uint8_t *)pout;
-	uint8_t out_buffer[64];
-	uint8_t in_buffer[64];
+	uint8_t out_buffer[64] ALIGN(32);
+	uint8_t in_buffer[64] ALIGN(32);
   
-  blake2b_state blake_state;
+  blake2b_state blake_state ALIGN(32);
   blake2b_init(&blake_state, 64);
   blake_state.buflen = blake_state.buf[1] = 4;
 	my_blake2b_update(&blake_state, in, 72);
 	blake2b_final(&blake_state, out_buffer, 64);
-	memcpy(out, out_buffer, 32);
+	//memcpy(out, out_buffer, 32);
+	{
+	  __m256i ymm = _mm256_load_si256(((const __m256i*)out_buffer));
+	  _mm256_store_si256((__m256i*)out, ymm);
+	}
 	out += 32;
 	
   register uint8_t i = 29;
 	while (i--) {
-		memcpy(in_buffer, out_buffer, 64);
+		//memcpy(in_buffer, out_buffer, 64);
+		{
+	    __m256i ymm = _mm256_load_si256((const __m256i*)out_buffer);
+	    _mm256_store_si256((__m256i*)in_buffer, ymm);
+	    ymm = _mm256_load_si256((const __m256i*)(out_buffer+32));
+	    _mm256_store_si256((__m256i*)(in_buffer+32), ymm);
+  	}
 		blake2b(out_buffer, in_buffer, NULL, 0);
-		memcpy(out, out_buffer, 32);
+		//memcpy(out, out_buffer, 32);
+		{
+  	  __m256i ymm = _mm256_load_si256(((const __m256i*)out_buffer));
+	    _mm256_store_si256((__m256i*)out, ymm);
+	  }
 		out += 32;
 	}
 
-	memcpy(in_buffer, out_buffer, 64);
+	//memcpy(in_buffer, out_buffer, 64);
+	{
+	  __m256i ymm = _mm256_load_si256((const __m256i*)out_buffer);
+	  _mm256_store_si256((__m256i*)in_buffer, ymm);
+	  ymm = _mm256_load_si256((const __m256i*)(out_buffer+32));
+    _mm256_store_si256((__m256i*)(in_buffer+32), ymm);
+	}
 	blake2b(out_buffer, in_buffer, NULL, 0);
-	memcpy(out, out_buffer, 64);
+	{
+	  __m256i ymm = _mm256_load_si256((const __m256i*)out_buffer);
+	  _mm256_store_si256((__m256i*)out, ymm);
+	  ymm = _mm256_load_si256((const __m256i*)(out_buffer+32));
+	  _mm256_store_si256((__m256i*)(out+32), ymm);
+  }
+	//memcpy(out, out_buffer, 64);
 
   burn(&blake_state, sizeof(blake_state));
 }

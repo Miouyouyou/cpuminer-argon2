@@ -295,17 +295,22 @@ asm_naked_fn_end(has_cpuid)
 #endif /* X86ASM */
 
 
+#if defined(__clang__)
+#include <cpuid.h>
+#endif
 static void NOINLINE
 get_cpuid(x86_regs *regs, uint32_t flags) {
 #if defined(COMPILER_MSVC)
 	__cpuid((int *)regs, (int)flags);
-#else
+#elif defined(__clang__)
+  
+#elif defined(__GNUC__)
 	#if defined(CPU_X86_64)
 		#define cpuid_bx rbx
 	#else
 		#define cpuid_bx ebx
 	#endif
-
+  
 	asm_gcc()
 		a1(push cpuid_bx)
 		a2(xor ecx, ecx)
@@ -317,6 +322,9 @@ get_cpuid(x86_regs *regs, uint32_t flags) {
 		a1(pop cpuid_bx)
 		asm_gcc_parms() : "+a"(flags) : "S"(regs)  : "%ecx", "%edx", "cc"
 	asm_gcc_end()
+  /* asm volatile
+      ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3])
+       : "a" (flags), "c" (0));*/   
 #endif
 }
 

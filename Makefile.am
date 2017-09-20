@@ -114,7 +114,7 @@ endif
 
 cpuminer_LDFLAGS	= @LDFLAGS@
 cpuminer_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@ -lssl -lcrypto
-cpuminer_CPPFLAGS = @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)  -DSCRYPT_SALSA64 -DSCRYPT_SKEIN512
+cpuminer_CPPFLAGS = @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)  -DSCRYPT_CHACHA -DSCRYPT_SKEIN512
 cpuminer_CFLAGS   = -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags)
 
 if HAVE_WINDOWS

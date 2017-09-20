@@ -209,16 +209,6 @@ my_scrypt(const uint8_t *password, size_t password_len, const uint8_t *salt, siz
 	scrypt_ROMixfn scrypt_ROMix = scrypt_getROMix();
 #endif
 
-/*
-#if !defined(SCRYPT_TEST)
-	static int power_on_self_test = 0;
-	if (!power_on_self_test) {
-		power_on_self_test = 1;
-		if (!scrypt_power_on_self_test())
-			scrypt_fatal_error("scrypt: power on self test failed");
-	}
-#endif
-*/
 	V = scrypt_alloc((uint64_t)512 * chunk_bytes);
 	YX = scrypt_alloc(2 * chunk_bytes);
 

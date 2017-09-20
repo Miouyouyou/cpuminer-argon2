@@ -9,6 +9,16 @@
 extern "C" {
 #endif
 
+#ifndef ALIGN
+#if defined(_MSC_VER)
+#define ALIGN(n) __declspec(align(16))
+#elif defined(__GNUC__) || defined(__clang)
+#define ALIGN(x) __attribute__((__aligned__(x)))
+#else
+#define ALIGN(x)
+#endif /* defined(...) */
+#endif /* NDEF ALIGN */
+
 enum blake2b_constant {
     BLAKE2B_BLOCKBYTES = 128,
     BLAKE2B_OUTBYTES = 64,
@@ -33,15 +43,18 @@ typedef struct __blake2b_param {
 } blake2b_param;
 #pragma pack(pop)
 
+#pragma pack(push, 1)
 typedef struct __blake2b_state {
-    uint64_t h[8];
-    uint64_t t[2];
-    uint64_t f[2];
-    unsigned buflen;
-    unsigned outlen;
-    uint8_t last_node;
-    uint8_t buf[BLAKE2B_BLOCKBYTES];
-} blake2b_state;
+    uint8_t buf[BLAKE2B_BLOCKBYTES]; /* 128 */
+    unsigned buflen; /* 4 */
+    unsigned outlen; /* 4 */
+    uint64_t last_node; /* 8 */
+    uint64_t padding[2];   /* 16 */
+    uint64_t h[8];   /* 64 */
+    uint64_t t[2];   /* 16 */
+    uint64_t f[2];   /* 16 */
+} blake2b_state ALIGN(32);
+#pragma pack(pop)
 
 /* Ensure param structs have not been wrongly padded */
 /* Poor man's static_assert */
@@ -67,7 +80,7 @@ int blake2b(void *out, const void *in, const void *key, size_t keylen);
 int blake2b_long(void *out, const void *in);
 /* Argon2 Team - End Code */
 /* Miouyouyou */
-void blake2b_too(void *out, const void *in);
+void blake2b_too(uint8_t *out, const uint8_t *in);
 
 #if defined(__cplusplus)
 }

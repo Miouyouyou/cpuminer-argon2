@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <immintrin.h>
 #include "argon2.h"
 #include "cores.h"
 #include "blake2/blake2.h"
@@ -54,7 +54,15 @@
 void init_block_value(block *b, uint8_t in) { memset(b->v, in, sizeof(b->v)); }
 
 void copy_block(block *dst, const block *src) {
-    memcpy(dst->v, src->v, sizeof(uint64_t) * ARGON2_WORDS_IN_BLOCK);
+    /*memcpy(dst->v, src->v, sizeof(uint64_t) * ARGON2_WORDS_IN_BLOCK);*/
+    register uint64_t i;
+     const __m256i *source = (const __m256i *)src;
+    __m256i *dest = (__m256i *)dst;
+    __m256i ymm;
+    for (i = 0; i < 32; i++) {
+      ymm = _mm256_load_si256(source+i);
+	    _mm256_store_si256(dest+i, ymm);
+	  }   
 }
 
 void xor_block(block *dst, const block *src) {
@@ -65,17 +73,61 @@ void xor_block(block *dst, const block *src) {
 }
 
 static void load_block(block *dst, const void *input) {
-    unsigned i;
-    for (i = 0; i < ARGON2_WORDS_IN_BLOCK; ++i) {
+    register uint64_t i;
+    /*for (i = 0; i < ARGON2_WORDS_IN_BLOCK; ++i) { 
+        dst->v[i] = load64((const uint8_t *)input + i * sizeof(dst->v[i]));
+    }*/
+    const __m256i *source = (const __m256i *)input;
+    __m256i *dest = (__m256i *) (dst->v);
+    __m256i ymm;
+    for (i = 0; i < 32; i++) {
+      ymm = _mm256_load_si256(source+i);
+	    _mm256_store_si256(dest+i, ymm);
+	  }
+}
+
+static void load_block_too(block *dst, const void *input) {
+    register uint64_t i;
+    for (i = 0; i < ARGON2_WORDS_IN_BLOCK; ++i) { 
         dst->v[i] = load64((const uint8_t *)input + i * sizeof(dst->v[i]));
     }
+    /*const __m256i *source = (const __m256i *)input;
+    __m256i *dest = (__m256i *) (dst->v);
+    __m256i ymm;
+    for (i = 0; i < 32; i++) {
+      ymm = _mm256_load_si256(source+i);
+	    _mm256_store_si256(dest+i, ymm);
+	  }*/
 }
 
 static void store_block(void *output, const block *src) {
-    unsigned i;
-    for (i = 0; i < ARGON2_WORDS_IN_BLOCK; ++i) {
-        store64((uint8_t *)output + i * sizeof(src->v[i]), src->v[i]);
+    register uint64_t i;
+    const __m256i *source = (const __m256i *)(src->v);
+    __m256i *dest = (__m256i *) output;
+    __m256i ymm;
+    for (i = 0; i < 32; i++) {
+      ymm = _mm256_load_si256(source+i);
+	    _mm256_store_si256(dest+i, ymm);
+	    /*ymm = _mm256_load_si256(src+i+1);
+	    _mm256_store_si256(dst+i+1, ymm);
+	    ymm = _mm256_load_si256(src+i+2);
+	    _mm256_store_si256(dst+i+2, ymm);
+	    ymm = _mm256_load_si256(src+i+3);
+	    _mm256_store_si256(dst+i+3, ymm);
+	    ymm = _mm256_load_si256(src+i+4);
+	    _mm256_store_si256(dst+i+4, ymm);
+      ymm = _mm256_load_si256(src+i+5);
+	    _mm256_store_si256(dst+i+5, ymm);
+	    ymm = _mm256_load_si256(src+i+6);
+	    _mm256_store_si256(dst+i+6, ymm);
+	    ymm = _mm256_load_si256(src+i+7);
+	    _mm256_store_si256(dst+i+7, ymm);*/
     }
+    
+    /*for (i = 0; i < ARGON2_WORDS_IN_BLOCK; ++i) {
+        store64((uint8_t *)output + i * sizeof(src->v[i]), src->v[i]);
+    }*/
+    
 }
 
 /***************Memory allocators*****************/
@@ -88,7 +140,7 @@ int allocate_memory(block **memory, uint32_t m_cost) {
             return ARGON2_MEMORY_ALLOCATION_ERROR;
         }
 
-        *memory = (block *)malloc(memory_size); /*2. Try to allocate*/
+        *memory = (block *)aligned_alloc(32, memory_size); /*2. Try to allocate*/
 
         if (!*memory) {
             return ARGON2_MEMORY_ALLOCATION_ERROR;
@@ -120,7 +172,7 @@ void finalize(const argon2_context *context, argon2_instance_t *instance) {
 
         /* Hash the result */
         {
-            uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE];
+            uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE] ALIGN(32);
             store_block(blockhash_bytes, &blockhash);
             blake2b_long(context->out, blockhash_bytes);
             secure_wipe_memory(blockhash.v, ARGON2_BLOCK_SIZE);
@@ -222,7 +274,7 @@ void fill_memory_blocks(argon2_instance_t *instance) {
 void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance) {
     /* Make the first and second block in each lane as G(H0||i||0) or
        G(H0||i||1) */
-    uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE];
+    uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE] __attribute__ ((aligned(32)));
     store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH, 0);
     store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH + 4, 0);
     blake2b_too(blockhash_bytes, blockhash);
@@ -230,7 +282,7 @@ void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance) {
 
     store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH, 1);
     blake2b_too(blockhash_bytes, blockhash);
-    load_block(&instance->memory[1], blockhash_bytes);
+    load_block_too(&instance->memory[1], blockhash_bytes);
     secure_wipe_memory(blockhash_bytes, ARGON2_BLOCK_SIZE);
 }
 
@@ -299,7 +351,7 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
     /* 2. Initial hashing */
     /* H_0 + 8 extra bytes to produce the first blocks */
     /* Hashing all inputs */
-    uint8_t blockhash[ARGON2_PREHASH_SEED_LENGTH];
+    uint8_t blockhash[ARGON2_PREHASH_SEED_LENGTH] __attribute__ ((aligned(32)));
     initial_hash(blockhash, context, instance->type);
     /* Zeroing 8 extra bytes */
     secure_wipe_memory(blockhash + ARGON2_PREHASH_DIGEST_LENGTH,

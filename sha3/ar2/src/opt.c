@@ -162,7 +162,7 @@ void fill_segment(const argon2_instance_t *instance,
     block *ref_block = NULL, *curr_block = NULL;
     uint64_t pseudo_rand, ref_index;
     uint32_t prev_offset, curr_offset;
-    uint8_t i;
+    uint32_t i;
     __m128i state[64];
     int data_independent_addressing = (instance->type == Argon2_i);
 
